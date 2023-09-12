@@ -1,6 +1,16 @@
 {
 	"name": "svelte-optimistic-store",
-	"version": "0.0.1",
+	"version": "0.0.2",
+	"author": "DerPenz",
+	"license": "MIT",
+	"description": "Handle optimistic state in svelte with one store",
+	"repository": "https://github.com/Der-Penz/svelte-optimistic-store",
+	"keywords": [
+		"svelte",
+		"sveltejs",
+		"store",
+		"svelteKit"
+	],
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",

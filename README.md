@@ -1,58 +1,85 @@
-# create-svelte
+# svelte-optimistic-store
 
-Everything you need to build a Svelte library, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+store to handle optimistic values in svelte
 
-Read more about creating a library [in the docs](https://kit.svelte.dev/docs/packaging).
+Inspired by reacts useOptimistic Hook
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Installation
 
 ```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+# install the dependence
+npm i svelte-optimistic-store
 ```
 
-## Developing
+## Usage
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+```ts
+// create a optimistic store with a default value
+import { optimistic } from 'svelte-optimistic-store';
 
-```bash
-npm run dev
+const likeStore = optimistic(1);
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+//update and set the store like always
+likeStore.set(2);
+likeStore.update((cur) => cur + 1);
+
+//update asynchronously (after one second store will change)
+likeStore.update(
+	(cur) =>
+		new Promise((res) =>
+			setTimeout(() => {
+				res(cur + 1);
+			}, 1000)
+		)
+);
+
+//update optimistically (after one second store will change to the actual value, but during this second the second argument will be value of the store)
+likeStore.update(
+	(cur) =>
+		new Promise((res) =>
+			setTimeout(() => {
+				res(cur + 1);
+			}, 1000)
+		),
+	(cur) => cur + 1 // updater function or just a value
+);
 ```
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
+If you want your optimistic item to have a different type than the normal store type you can provide two generics to the store (e.g if you want a way to distinguish a optimistic array item and add special classes to it). By default the second generic is the same as the first.
 
-## Building
+```ts
+import { optimistic } from 'svelte-optimistic-store';
 
-To build your library:
+type Todo = {
+	id: number;
+	content: string;
+	done: boolean;
+};
 
-```bash
-npm run package
+type OptimisticTodo = Todo & {
+	optimistic: true;
+};
+
+const todoStore = optimistic<Todo[], OptimisticTodo[]>([]);
+
+todoStore.update(
+	(cur) =>
+		new Promise((res) =>
+			setTimeout(() => {
+				res([...cur, { id: 2, content: 'Write a post', done: false }]);
+			}, 1000)
+		),
+	(cur) => [...cur, { id: 2, content: 'Write a post', done: false, optimistic: true }]
+
+);
 ```
 
-To create a production version of your showcase app:
+In your UI you can do something like this now
 
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```bash
-npm publish
+```ts
+{#each $todoStore as todo }
+	<div class:ghost={todo.optimistic}>
+		{todo.content}
+	</div>
+{/each}
 ```
