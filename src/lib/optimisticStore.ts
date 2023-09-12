@@ -8,10 +8,10 @@ type OptimisticUpdater<T, K> = (value: T) => K;
  * if you use typescript you can provide to generic Types first one being the type of the stores state.
  * second one being a different type if needed for the optimistic type (defaults to the first type).
  * Useful if you want to differentiate the optimistic value from the actual one and and special classes to it
- * @param defaultValue
+ * @param initialValue
  */
-export const optimistic = <TValue, TOptimistic = TValue>(defaultValue?: TValue) => {
-	const actualValueStore = writable(defaultValue);
+export const optimistic = <TValue, TOptimistic = TValue>(initialValue?: TValue) => {
+	const actualValueStore = writable(initialValue);
 	const optimisticValueStore = writable<TOptimistic | undefined>();
 	const isOptimistic = writable(false);
 	const valueStore = derived(
@@ -33,8 +33,9 @@ export const optimistic = <TValue, TOptimistic = TValue>(defaultValue?: TValue) 
 		//Optimistic update involved
 		if (arguments.length > 1) {
 			if (typeof optimistic === 'function') {
-				// @ts-ignore
-				optimisticValueStore.set(optimistic(get(actualValueStore)));
+				optimisticValueStore.set(
+					(optimistic as OptimisticUpdater<TValue, TOptimistic>)(get(actualValueStore))
+				);
 			} else {
 				optimisticValueStore.set(optimistic);
 			}
@@ -49,8 +50,8 @@ export const optimistic = <TValue, TOptimistic = TValue>(defaultValue?: TValue) 
 							actualValueStore.set(resolved);
 						}
 					})
-					.catch((rejected) => {
-						console.error('Error: update rejected, reset value');
+					.catch(() => {
+						//Error: update rejected, reset value
 					})
 					.finally(() => {
 						isOptimistic.set(false);
@@ -69,7 +70,7 @@ export const optimistic = <TValue, TOptimistic = TValue>(defaultValue?: TValue) 
 					.then((resolved) => {
 						actualValueStore.set(resolved);
 					})
-					.catch((rejected) => {
+					.catch(() => {
 						console.error('Error: update rejected, no change');
 					})
 					.finally(() => {
@@ -91,7 +92,7 @@ export const optimistic = <TValue, TOptimistic = TValue>(defaultValue?: TValue) 
 	}
 
 	/**
-	 * cancels a current optimistic value and resets to last value of the store
+	 * cancels a current optimistic update and resets to last value of the store
 	 */
 	function cancel() {
 		isOptimistic.set(false);
