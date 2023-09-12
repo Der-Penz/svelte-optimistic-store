@@ -33,8 +33,9 @@ export const optimistic = <TValue, TOptimistic = TValue>(initialValue?: TValue) 
 		//Optimistic update involved
 		if (arguments.length > 1) {
 			if (typeof optimistic === 'function') {
-				// @ts-ignore
-				optimisticValueStore.set(optimistic(get(actualValueStore)));
+				optimisticValueStore.set(
+					(optimistic as OptimisticUpdater<TValue, TOptimistic>)(get(actualValueStore))
+				);
 			} else {
 				optimisticValueStore.set(optimistic);
 			}
@@ -49,7 +50,7 @@ export const optimistic = <TValue, TOptimistic = TValue>(initialValue?: TValue) 
 							actualValueStore.set(resolved);
 						}
 					})
-					.catch((rejected) => {
+					.catch(() => {
 						//Error: update rejected, reset value
 					})
 					.finally(() => {
@@ -69,7 +70,7 @@ export const optimistic = <TValue, TOptimistic = TValue>(initialValue?: TValue) 
 					.then((resolved) => {
 						actualValueStore.set(resolved);
 					})
-					.catch((rejected) => {
+					.catch(() => {
 						console.error('Error: update rejected, no change');
 					})
 					.finally(() => {

@@ -1,6 +1,6 @@
 {
 	"name": "svelte-optimistic-store",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"author": "DerPenz",
 	"license": "MIT",
 	"description": "Handle optimistic state in svelte with one store",
@@ -20,8 +20,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
-		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"lint": "prettier --plugin-search-dir ./src --check ./src && eslint ./src",
+		"format": "prettier --plugin-search-dir ./src --write ./src"
 	},
 	"exports": {
 		".": {
