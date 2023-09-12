@@ -1,4 +1,4 @@
-name: Node.js CI Linting
+name: Pull Request Test
 
 on:
   pull_request:
@@ -14,4 +14,4 @@ jobs:
           node-version: '19.x'
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
-      - run: npm run lint
+      - run: npm run test
